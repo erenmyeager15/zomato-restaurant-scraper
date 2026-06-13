@@ -190,6 +190,7 @@ async function extractRestaurants(page: Page, citySlug: string): Promise<RawRest
         const path = parsed.pathname.toLowerCase();
         if (!parsed.hostname.includes('zomato.com')) return false;
         if (!path.includes(`/${slug}/`)) return false;
+        if (!path.endsWith('/info')) return false;
         if (path === `/${slug}/restaurants` || path.includes('/restaurants/')) return false;
         if (/(collections|events|gold|who-we-are|careers|partner-with-us|privacy|contact)/.test(path)) return false;
         return path.split('/').filter(Boolean).length >= 2;

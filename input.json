@@ -1,0 +1,10 @@
+{
+  "city": "Mumbai",
+  "searchQueries": ["restaurants"],
+  "maxResults": 10,
+  "proxyConfiguration": {
+    "useApifyProxy": true,
+    "apifyProxyGroups": ["RESIDENTIAL"],
+    "apifyProxyCountry": "IN"
+  }
+}

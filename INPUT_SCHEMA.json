@@ -1,0 +1,63 @@
+{
+  "title": "Zomato Restaurant Scraper Input",
+  "description": "Collect public restaurant listing data from Zomato by city and search keywords.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "city": {
+      "title": "City",
+      "description": "Zomato city to search, for example Mumbai, Delhi NCR, Bengaluru, Pune, Hyderabad, or Chennai.",
+      "type": "string",
+      "editor": "textfield",
+      "default": "Mumbai"
+    },
+    "searchQueries": {
+      "title": "Search keywords",
+      "description": "Restaurant or cuisine keywords. Use restaurants for the general city listing.",
+      "type": "array",
+      "editor": "stringList",
+      "default": ["restaurants"]
+    },
+    "categories": {
+      "title": "Cuisine / text filters",
+      "description": "Optional filters such as biryani, pizza, cafe, chinese, or dessert. Matching is case-insensitive.",
+      "type": "array",
+      "editor": "stringList",
+      "default": []
+    },
+    "minRating": {
+      "title": "Minimum rating",
+      "description": "Only save restaurants at or above this rating when rating is available.",
+      "type": "number",
+      "editor": "number",
+      "minimum": 0,
+      "maximum": 5,
+      "default": 0
+    },
+    "maxResults": {
+      "title": "Maximum restaurants",
+      "description": "Maximum unique restaurant records to save across all keywords.",
+      "type": "integer",
+      "editor": "number",
+      "minimum": 1,
+      "maximum": 500,
+      "default": 50
+    },
+    "proxyConfiguration": {
+      "title": "Proxy configuration",
+      "description": "Residential India proxies are recommended for reliable regional access.",
+      "type": "object",
+      "editor": "proxy",
+      "default": {
+        "useApifyProxy": true,
+        "apifyProxyGroups": ["RESIDENTIAL"],
+        "apifyProxyCountry": "IN"
+      },
+      "prefill": {
+        "useApifyProxy": true,
+        "apifyProxyGroups": ["RESIDENTIAL"],
+        "apifyProxyCountry": "IN"
+      }
+    }
+  }
+}

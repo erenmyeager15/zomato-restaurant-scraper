@@ -1,0 +1,88 @@
+{
+  "actorSpecification": 1,
+  "views": {
+    "restaurants": {
+      "title": "Restaurants",
+      "transformation": {
+        "fields": [
+          "source",
+          "imageUrl",
+          "searchQuery",
+          "city",
+          "position",
+          "restaurantId",
+          "restaurantName",
+          "cuisines",
+          "rating",
+          "reviewCount",
+          "costForTwo",
+          "priceRange",
+          "locality",
+          "address",
+          "deliveryTime",
+          "restaurantUrl",
+          "scrapedAt"
+        ]
+      },
+      "display": {
+        "component": "table",
+        "properties": {
+          "source": {
+            "label": "Source"
+          },
+          "imageUrl": {
+            "label": "Image",
+            "format": "image"
+          },
+          "searchQuery": {
+            "label": "Search"
+          },
+          "city": {
+            "label": "City"
+          },
+          "position": {
+            "label": "Position"
+          },
+          "restaurantId": {
+            "label": "Restaurant ID"
+          },
+          "restaurantName": {
+            "label": "Restaurant"
+          },
+          "cuisines": {
+            "label": "Cuisines"
+          },
+          "rating": {
+            "label": "Rating"
+          },
+          "reviewCount": {
+            "label": "Reviews"
+          },
+          "costForTwo": {
+            "label": "Cost for Two"
+          },
+          "priceRange": {
+            "label": "Price Range"
+          },
+          "locality": {
+            "label": "Locality"
+          },
+          "address": {
+            "label": "Address"
+          },
+          "deliveryTime": {
+            "label": "Delivery Time"
+          },
+          "restaurantUrl": {
+            "label": "URL",
+            "format": "link"
+          },
+          "scrapedAt": {
+            "label": "Scraped At",
+            "format": "date"
+          }
+        }
+      }
+    }
+  }
+}

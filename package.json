@@ -1,0 +1,19 @@
+{
+  "name": "zomato-restaurant-scraper",
+  "version": "1.0.0",
+  "description": "Apify Actor for scraping public Zomato restaurant listings.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "apify": "^3.4.2",
+    "crawlee": "^3.15.1",
+    "playwright": "^1.54.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "typescript": "^5.7.2"
+  }
+}

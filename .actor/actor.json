@@ -1,0 +1,33 @@
+{
+  "actorSpecification": 1,
+  "name": "zomato-restaurant-scraper",
+  "title": "Zomato Restaurant Scraper - Listings, Ratings & Prices",
+  "description": "Scrape public Zomato restaurant listings with names, cuisines, ratings, review counts, pricing, locality, images, and restaurant URLs. Useful for restaurant market research and local food data monitoring.",
+  "version": "1.0",
+  "dockerfile": "Dockerfile",
+  "input": "../INPUT_SCHEMA.json",
+  "readme": "../README.md",
+  "categories": ["TRAVEL", "OTHER"],
+  "pricingInfo": {
+    "pricingModel": "PAY_PER_EVENT",
+    "pricingPerEvent": {
+      "actorChargeEvents": {
+        "restaurant-scraped": {
+          "eventTitle": "Restaurant scraped",
+          "eventDescription": "Charged once for each clean Zomato restaurant record saved to the dataset.",
+          "eventPriceUsd": 0.003,
+          "isPrimaryEvent": true,
+          "isOneTimeEvent": false
+        }
+      }
+    }
+  },
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "defaultRunOptions": {
+    "build": "latest",
+    "memoryMbytes": 4096,
+    "timeoutSecs": 14400
+  }
+}

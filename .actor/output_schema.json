@@ -1,0 +1,14 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "Zomato Restaurant Scraper Output",
+  "description": "Structured Zomato restaurant records with restaurant names, cuisines, ratings, review counts, cost for two, locality, address, delivery data, image URLs, restaurant URLs, and scraped timestamps.",
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "string",
+      "title": "Zomato restaurant records",
+      "description": "Clean dataset items containing public Zomato restaurant listing, rating, pricing, location, and URL data.",
+      "template": "{{links.apiDefaultDatasetUrl}}/items"
+    }
+  }
+}

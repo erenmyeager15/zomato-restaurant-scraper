@@ -3,7 +3,7 @@ import { scrapeZomato } from './routes.js';
 import type { ActorInput, NormalizedInput } from './types.js';
 
 const DEFAULT_CITY = 'Mumbai';
-const DEFAULT_QUERIES = ['restaurants'];
+const DEFAULT_QUERIES = ['pizza'];
 const MAX_RESULTS_LIMIT = 500;
 
 function slugifyCity(city: string): string {
@@ -23,8 +23,8 @@ function normalizeInput(input: ActorInput | null): NormalizedInput {
   const categories = (input?.categories ?? [])
     .map((category) => category.trim().toLowerCase())
     .filter(Boolean);
-  const maxResults = Math.min(Math.max(input?.maxResults ?? 50, 1), MAX_RESULTS_LIMIT);
-  const minRating = Math.min(Math.max(input?.minRating ?? 0, 0), 5);
+  const maxResults = Math.min(Math.max(input?.maxResults ?? 5, 1), MAX_RESULTS_LIMIT);
+  const minRating = Math.min(Math.max(input?.minRating ?? 4, 0), 5);
 
   return {
     city,
@@ -47,9 +47,12 @@ try {
     maxResults: input.maxResults,
   });
 
-  await scrapeZomato(input, async (record) => {
-    await Actor.pushData(record);
-    await Actor.charge({ eventName: 'restaurant-scraped' });
+    await scrapeZomato(input, async (record) => {
+      const chargeResult = await Actor.pushData(record, 'restaurant-scraped');
+      return {
+        saved: chargeResult.chargedCount > 0 || !chargeResult.eventChargeLimitReached,
+        eventChargeLimitReached: chargeResult.eventChargeLimitReached,
+      };
   });
 
   log.info('Zomato restaurant scrape finished');

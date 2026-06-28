@@ -3,7 +3,12 @@ import { PlaywrightCrawler, type RequestOptions } from 'crawlee';
 import type { Page } from 'playwright';
 import type { NormalizedInput, RawRestaurant, RestaurantRecord } from './types.js';
 
-type PushRecord = (record: RestaurantRecord) => Promise<void>;
+interface PushRecordResult {
+  saved: boolean;
+  eventChargeLimitReached?: boolean;
+}
+
+type PushRecord = (record: RestaurantRecord) => Promise<PushRecordResult>;
 
 const BLOCKED_PATTERNS = [
   /captcha/i,
@@ -88,7 +93,10 @@ function inferLocality(locality: string | null, address: string | null, city: st
 
 function passesFilters(raw: RawRestaurant, input: NormalizedInput): boolean {
   if (!raw.restaurantName || !raw.restaurantUrl) return false;
-  if (raw.rating !== null && raw.rating < input.minRating) return false;
+  if (input.minRating > 0) {
+    if (raw.rating === null) return false;
+    if (raw.rating < input.minRating) return false;
+  }
   if (!input.categories.length) return true;
 
   const haystack = [
@@ -165,10 +173,19 @@ async function extractRestaurants(page: Page, citySlug: string): Promise<RawRest
     };
 
     const parseRating = (value: string | null | undefined): number | null => {
-      const match = value?.match(/\b([3-4]\.\d|5(?:\.0)?)\b/);
+      const text = value?.replace(/[\u200B-\u200D\uFEFF\u2060]/g, '').replace(/\s+/g, ' ').trim();
+      if (!text) return null;
+
+      const contextMatch =
+        text.match(/\b(?:rated|rating|stars?)\s*[:\-]?\s*([0-5](?:\.\d+)?)\b/i)
+        ?? text.match(/\b([0-5](?:\.\d+)?)\s*(?:\/\s*5|stars?|rating|rated)\b/i);
+      const standaloneMatch = text.match(/^([0-5](?:\.\d+)?)$/);
+      const decimalMatch = text.match(/\b([0-5]\.\d+)\b/);
+      const match = standaloneMatch ?? contextMatch ?? decimalMatch;
       if (!match) return null;
+
       const rating = Number(match[1]);
-      return Number.isFinite(rating) ? rating : null;
+      return Number.isFinite(rating) && rating >= 0 && rating <= 5 ? rating : null;
     };
 
     const parseReviewCount = (value: string | null | undefined): number | null => {
@@ -329,6 +346,8 @@ export async function scrapeZomato(input: NormalizedInput, pushRecord: PushRecor
   const proxyConfiguration = await Actor.createProxyConfiguration(input.proxyConfiguration);
   const seen = new Set<string>();
   let savedCount = 0;
+  let spendingLimitReached = false;
+  let failedRequestCount = 0;
 
   const requests: RequestOptions[] = input.searchQueries.map((query) => ({
     url: buildSearchUrl(input.citySlug, query),
@@ -342,10 +361,11 @@ export async function scrapeZomato(input: NormalizedInput, pushRecord: PushRecor
     sessionPoolOptions: {
       maxPoolSize: 30,
       sessionOptions: {
-        maxUsageCount: 30,
+        maxUsageCount: 10,
       },
     },
     maxRequestRetries: 3,
+    maxSessionRotations: 3,
     requestHandlerTimeoutSecs: 180,
     navigationTimeoutSecs: 60,
     retryOnBlocked: true,
@@ -363,7 +383,7 @@ export async function scrapeZomato(input: NormalizedInput, pushRecord: PushRecor
       },
     ],
     requestHandler: async ({ page, request }) => {
-      if (savedCount >= input.maxResults) return;
+      if (savedCount >= input.maxResults || spendingLimitReached) return;
 
       const query = String(request.userData.query ?? 'restaurants');
       log.info('Opening Zomato search page', { query, url: request.url });
@@ -382,16 +402,36 @@ export async function scrapeZomato(input: NormalizedInput, pushRecord: PushRecor
         const url = normalizeUrl(raw.restaurantUrl);
         const key = url ?? `${raw.restaurantName}-${raw.locality}`;
         if (!key || seen.has(key)) continue;
-        seen.add(key);
-
         const record = toRecord(raw, input, query, savedCount + 1);
         if (!record.restaurantUrl || !record.restaurantName) continue;
 
-        await pushRecord(record);
-        savedCount += 1;
+          try {
+            const chargeResult = await pushRecord(record);
+          if (chargeResult.saved) {
+            seen.add(key);
+            savedCount += 1;
+          }
+
+          if (chargeResult.eventChargeLimitReached) {
+            spendingLimitReached = true;
+            await Actor.setStatusMessage(`Stopped at the user's spending limit after ${savedCount} restaurants`);
+            log.info('User spending limit reached; stopping before more Zomato pages are requested.');
+            await crawler.autoscaledPool?.abort();
+            break;
+          }
+        } catch (error) {
+          spendingLimitReached = true;
+          await Actor.setStatusMessage('Stopped because restaurant output billing failed.');
+          log.error('Stopping Zomato run because dataset push with restaurant-scraped charge failed.', {
+            error: error instanceof Error ? error.message : String(error),
+          });
+          await crawler.autoscaledPool?.abort();
+          throw error;
+        }
       }
     },
     failedRequestHandler: async ({ request, error }) => {
+      failedRequestCount += 1;
       log.warning('Zomato request failed after retries', {
         url: request.url,
         error: error instanceof Error ? error.message : String(error),
@@ -400,5 +440,11 @@ export async function scrapeZomato(input: NormalizedInput, pushRecord: PushRecor
   });
 
   await crawler.run(requests);
+  if (savedCount === 0 && failedRequestCount > 0) {
+    throw new Error(`Zomato scrape failed: ${failedRequestCount} request(s) failed and no restaurants were saved.`);
+  }
+  if (savedCount === 0 && !spendingLimitReached) {
+    throw new Error('Zomato scrape finished with no saved restaurants.');
+  }
   log.info('Saved restaurants', { savedCount });
 }

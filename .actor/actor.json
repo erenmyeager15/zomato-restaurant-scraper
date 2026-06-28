@@ -7,11 +7,19 @@
   "dockerfile": "Dockerfile",
   "input": "../INPUT_SCHEMA.json",
   "readme": "../README.md",
+  "output": "./output_schema.json",
   "categories": ["TRAVEL", "OTHER"],
   "pricingInfo": {
     "pricingModel": "PAY_PER_EVENT",
     "pricingPerEvent": {
       "actorChargeEvents": {
+        "apify-actor-start": {
+          "eventTitle": "Actor start",
+          "eventDescription": "Charged when the run starts to cover browser startup and the residential proxy session. Number of events depends on memory (one per GB, minimum one).",
+          "eventPriceUsd": 0.001,
+          "isPrimaryEvent": false,
+          "isOneTimeEvent": true
+        },
         "restaurant-scraped": {
           "eventTitle": "Restaurant scraped",
           "eventDescription": "Charged once for each clean Zomato restaurant record saved to the dataset.",
@@ -27,7 +35,7 @@
   },
   "defaultRunOptions": {
     "build": "latest",
-    "memoryMbytes": 4096,
-    "timeoutSecs": 14400
+    "memoryMbytes": 2048,
+    "timeoutSecs": 3600
   }
 }

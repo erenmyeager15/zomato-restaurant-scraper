@@ -1,6 +1,6 @@
 {
   "title": "Zomato Restaurant Scraper Input",
-  "description": "Collect public restaurant listing data from Zomato by city and search keyword. For a low-cost test, use one city, one keyword, minRating 4, maxResults 5, and India residential proxy.",
+  "description": "Collect public restaurant listing data from Zomato by city and search keyword. For a low-cost first run, use one city, one keyword, minRating 0, maxResults 1, and the recommended India residential proxy.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
@@ -16,36 +16,38 @@
       "description": "Restaurant or cuisine keywords. Start with one keyword such as pizza, biryani, cafe, or restaurants.",
       "type": "array",
       "editor": "stringList",
-      "default": ["pizza"]
+      "default": ["pizza"],
+      "maxItems": 20
     },
     "categories": {
       "title": "Cuisine / text filters",
       "description": "Optional filters such as biryani, pizza, cafe, chinese, or dessert. Matching is case-insensitive.",
       "type": "array",
       "editor": "stringList",
-      "default": []
+      "default": [],
+      "maxItems": 20
     },
     "minRating": {
       "title": "Minimum rating",
-      "description": "Only save restaurants at or above this rating when rating is available. Use 4 for cleaner test results, or 0 to include unrated listings.",
+      "description": "Only save restaurants at or above this rating. Use 0 for the most reliable first run, then raise it when you need higher-rated listings.",
       "type": "number",
       "editor": "number",
       "minimum": 0,
       "maximum": 5,
-      "default": 4
+      "default": 0
     },
     "maxResults": {
       "title": "Maximum restaurants",
-      "description": "Maximum unique restaurant records to save across all keywords. Use 5-10 for test runs.",
+      "description": "Maximum unique restaurant records to save across all keywords. Start with 1, inspect the output, and then scale up.",
       "type": "integer",
       "editor": "number",
       "minimum": 1,
       "maximum": 500,
-      "default": 5
+      "default": 1
     },
     "proxyConfiguration": {
       "title": "Proxy configuration",
-      "description": "Residential India proxies are recommended for reliable regional access and are billed as platform usage.",
+      "description": "Residential India proxies are recommended for reliable regional access and consume platform resources.",
       "type": "object",
       "editor": "proxy",
       "default": {

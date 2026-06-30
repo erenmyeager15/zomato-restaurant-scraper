@@ -4,19 +4,25 @@
   "title": "Zomato Restaurant Scraper - Listings, Ratings & Prices",
   "description": "Scrape public Zomato restaurant listings with names, cuisines, ratings, review counts, pricing, locality, images, and restaurant URLs. Useful for restaurant market research and local food data monitoring.",
   "version": "1.0",
+  "buildTag": "latest",
   "dockerfile": "Dockerfile",
   "input": "../INPUT_SCHEMA.json",
   "readme": "../README.md",
   "output": "./output_schema.json",
-  "categories": ["TRAVEL", "OTHER"],
+  "categories": ["OTHER", "ECOMMERCE"],
+  "categoriesVersion": "1.0.0",
+  "exampleRunInput": {
+    "body": "{\"city\":\"Mumbai\",\"searchQueries\":[\"pizza\"],\"categories\":[],\"minRating\":0,\"maxResults\":1,\"proxyConfiguration\":{\"useApifyProxy\":true,\"apifyProxyGroups\":[\"RESIDENTIAL\"],\"apifyProxyCountry\":\"IN\"}}",
+    "contentType": "application/json"
+  },
   "pricingInfo": {
     "pricingModel": "PAY_PER_EVENT",
     "pricingPerEvent": {
       "actorChargeEvents": {
         "apify-actor-start": {
-          "eventTitle": "Actor start",
-          "eventDescription": "Charged when the run starts to cover browser startup and the residential proxy session. Number of events depends on memory (one per GB, minimum one).",
-          "eventPriceUsd": 0.001,
+          "eventTitle": "Actor Start",
+          "eventDescription": "Charged when the Actor starts. Number of events depends on memory (one per GB, minimum one).",
+          "eventPriceUsd": 0.00005,
           "isPrimaryEvent": false,
           "isOneTimeEvent": true
         },
@@ -35,7 +41,9 @@
   },
   "defaultRunOptions": {
     "build": "latest",
-    "memoryMbytes": 2048,
+    "memoryMbytes": 4096,
     "timeoutSecs": 3600
-  }
+  },
+  "minMemoryMbytes": 4096,
+  "maxMemoryMbytes": 4096
 }

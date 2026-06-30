@@ -366,6 +366,7 @@ export async function scrapeZomato(input: NormalizedInput, pushRecord: PushRecor
     },
     maxRequestRetries: 3,
     maxSessionRotations: 3,
+    maxConcurrency: 1,
     requestHandlerTimeoutSecs: 180,
     navigationTimeoutSecs: 60,
     retryOnBlocked: true,
@@ -405,8 +406,8 @@ export async function scrapeZomato(input: NormalizedInput, pushRecord: PushRecor
         const record = toRecord(raw, input, query, savedCount + 1);
         if (!record.restaurantUrl || !record.restaurantName) continue;
 
-          try {
-            const chargeResult = await pushRecord(record);
+        try {
+          const chargeResult = await pushRecord(record);
           if (chargeResult.saved) {
             seen.add(key);
             savedCount += 1;
